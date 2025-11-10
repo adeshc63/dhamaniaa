@@ -1,0 +1,58 @@
+========================================
+QUICK SETUP - 6 EASY STEPS
+========================================
+
+STEP 1: Share Google Sheet
+---------------------------
+1. Open: https://docs.google.com/spreadsheets/d/1ZLniqVQ31t8uahAoIflZm6Jy8wM5gMRYOYG-oIhS6KU/edit
+2. Click "Share"
+3. Add: adesh-12@ultra-surfer-437605-i5.iam.gserviceaccount.com
+4. Permission: Editor
+5. Click "Share"
+
+STEP 2: Create GitHub Repo
+---------------------------
+1. Go to: https://github.com/new
+2. Name: nursing-jobs-agent
+3. Click "Create repository"
+
+STEP 3: Upload Files
+--------------------
+Upload from E:\aitomation\JobSpy\agent\:
+- agent.py
+- requirements.txt
+- README.md
+- .gitignore
+- .github/workflows/scrape.yml
+
+STEP 4: Get Service Account JSON
+---------------------------------
+File location: C:\Users\adesh\service_account.json
+Open and copy ALL content
+
+STEP 5: Set GitHub Secrets
+---------------------------
+Go to: Repo → Settings → Secrets and variables → Actions
+
+Secret 1:
+  Name: SERVICE_ACCOUNT_JSON
+  Value: [Paste entire JSON from step 4]
+
+Secret 2:
+  Name: SHEET_ID
+  Value: 1ZLniqVQ31t8uahAoIflZm6Jy8wM5gMRYOYG-oIhS6KU
+
+STEP 6: Run!
+------------
+1. Go to Actions tab
+2. Click "UAE Nursing Jobs Scraper"
+3. Click "Run workflow"
+4. Wait 5-10 minutes
+5. Check your Google Sheet!
+
+========================================
+DONE! Jobs will update every 6 hours!
+========================================
+
+Your Sheet:
+https://docs.google.com/spreadsheets/d/1ZLniqVQ31t8uahAoIflZm6Jy8wM5gMRYOYG-oIhS6KU/edit

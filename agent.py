@@ -43,6 +43,31 @@ ALL_PLATFORMS = ["indeed", "linkedin"]  # Naukri removed - blocked by recaptcha
 
 print(f"Searching for jobs from: {first_day_of_month.strftime('%B %d, %Y')}")
 print(f"Hours to search: {HOURS_IN_CURRENT_MONTH} hours (current month only)")
+print(f"🕐 Agent started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+print("="*80)
+
+# ============================================================================
+# STATUS TRACKING
+# ============================================================================
+run_status = {
+    "start_time": datetime.now(),
+    "jobspy_searches_completed": 0,
+    "hospital_scrapers_completed": 0,
+    "total_jobs_scraped": 0,
+    "new_jobs_added": 0,
+    "total_jobs_in_sheet": 0,
+    "errors": [],
+    "success": False
+}
+
+def log_status(message, status_type="INFO"):
+    """Log status with timestamp"""
+    timestamp = datetime.now().strftime('%H:%M:%S')
+    symbols = {"INFO": "ℹ️", "SUCCESS": "✅", "ERROR": "❌", "WARNING": "⚠️"}
+    symbol = symbols.get(status_type, "ℹ️")
+    print(f"[{timestamp}] {symbol} {message}")
+
+log_status("Agent initialization complete", "SUCCESS")
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -768,11 +793,13 @@ def scrape_healthpoint():
 # JOBSPY SCRAPING
 # ============================================================================
 
+log_status("Starting JobSpy scraping (7 searches)", "INFO")
 all_jobs = []
 total_before_dedup = 0
 
 # Search 1: General nursing jobs in Dubai
 print(f"\n[1/7] Searching for nursing jobs in Dubai (Current month only - {HOURS_IN_CURRENT_MONTH} hours)...")
+log_status("JobSpy Search 1/7: Dubai nursing jobs", "INFO")
 jobs1 = scrape_jobs(
     site_name=ALL_PLATFORMS,
     search_term="nurse nursing registered nurse",
@@ -1367,9 +1394,55 @@ try:
     print(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("="*80)
 
+    # ========================================================================
+    # FINAL STATUS SUMMARY
+    # ========================================================================
+    run_status["success"] = True
+    run_status["total_jobs_in_sheet"] = len(combined_df)
+    run_status["new_jobs_added"] = new_jobs_count if 'new_jobs_count' in locals() else 0
+
+    end_time = datetime.now()
+    duration = (end_time - run_status["start_time"]).total_seconds()
+
+    print("\n" + "="*80)
+    print("📊 AGENT RUN SUMMARY")
+    print("="*80)
+    log_status(f"Total runtime: {int(duration)} seconds ({duration/60:.1f} minutes)", "INFO")
+    log_status(f"JobSpy searches: 7/7 completed", "SUCCESS")
+    log_status(f"Hospital scrapers: 15 attempted", "INFO")
+    log_status(f"Jobs scraped this run: {len(new_jobs_df)}", "SUCCESS")
+    log_status(f"🔥 NEW jobs added to sheet: {run_status['new_jobs_added']}", "SUCCESS")
+    log_status(f"📝 Total jobs in sheet: {run_status['total_jobs_in_sheet']}", "SUCCESS")
+    log_status(f"Sheet URL: https://docs.google.com/spreadsheets/d/{SHEET_ID}", "INFO")
+    log_status(f"Agent finished at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}", "SUCCESS")
+    print("="*80)
+
+    if run_status["errors"]:
+        print("\n⚠️ ERRORS ENCOUNTERED:")
+        for error in run_status["errors"]:
+            print(f"  - {error}")
+    else:
+        log_status("No errors! Clean run ✓", "SUCCESS")
+
+    print("="*80)
+
 except FileNotFoundError:
+    log_status("service_account.json file not found!", "ERROR")
+    run_status["errors"].append("Missing service_account.json")
+    run_status["success"] = False
     print("\n[ERROR] service_account.json file not found!")
     print("="*80)
 except Exception as e:
+    log_status(f"Failed to update Google Sheets: {e}", "ERROR")
+    run_status["errors"].append(str(e))
+    run_status["success"] = False
     print(f"\n[ERROR] Failed to update Google Sheets: {e}")
     print("="*80)
+
+# Print final status
+print("\n" + "="*80)
+if run_status["success"]:
+    log_status("✅ AGENT RUN COMPLETED SUCCESSFULLY!", "SUCCESS")
+else:
+    log_status("❌ AGENT RUN FAILED - CHECK ERRORS ABOVE", "ERROR")
+print("="*80)

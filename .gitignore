@@ -1,0 +1,31 @@
+# Credentials
+service_account.json
+credentials.json
+*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Excel files (local testing)
+*.xlsx
+*.xls
+*.csv
+
+# OS
+.DS_Store
+Thumbs.db
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
