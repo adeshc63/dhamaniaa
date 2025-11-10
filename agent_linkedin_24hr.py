@@ -256,89 +256,30 @@ try:
     if new_jobs_count > 0:
         log_status(f"🔥 Found {new_jobs_count} NEW LinkedIn jobs to add!", "SUCCESS")
 
-        # Combine: new jobs + existing jobs
-        combined_df = pd.concat([truly_new, job_rows_df], ignore_index=True)
+        # SIMPLE APPEND MODE - Just add new jobs to existing data
+        # Convert timestamps to string
+        truly_new["Collected At"] = pd.to_datetime(truly_new["Collected At"], errors='coerce').astype(str)
 
-        # Sort by date (newest first)
-        combined_df["Collected At"] = pd.to_datetime(combined_df["Collected At"], errors='coerce')
-        combined_df = combined_df.sort_values(by="Collected At", ascending=False, na_position='last')
+        # Append new jobs at the END of existing data (will appear at bottom)
+        log_status("Appending new jobs to sheet...", "INFO")
 
-        # Convert Timestamp to string for JSON serialization
-        combined_df["Collected At"] = combined_df["Collected At"].astype(str)
+        # Get current sheet row count
+        existing_row_count = len(existing_data)
+        start_row = existing_row_count + 1
 
-        log_status(f"Total jobs after adding new: {len(combined_df)}", "INFO")
+        # Convert to list format for append
+        new_rows = truly_new.values.tolist()
 
-        # Prepare data with DAILY separators
-        log_status("Adding daily date separators...", "INFO")
+        # Append rows (no formatting, no separators - keeps existing sheet clean)
+        worksheet.append_rows(new_rows, value_input_option='RAW')
 
-        data_to_upload = [list(combined_df.columns)]
-
-        current_month = None
-        current_date = None
-        date_separator_rows = []
-        month_separator_rows = []
-
-        for idx, row in combined_df.iterrows():
-            try:
-                collected_date = pd.to_datetime(row['Collected At'])
-                year_num = collected_date.year
-                month_num = collected_date.month
-                day_num = collected_date.day
-                month_key = f"{year_num}-{month_num:02d}"
-                date_key = f"{year_num}-{month_num:02d}-{day_num:02d}"
-
-                # Add month separator if month changed
-                if current_month != month_key:
-                    current_month = month_key
-                    month_label = f"═══════════ {collected_date.strftime('%B %Y').upper()} ═══════════"
-                    month_row = [month_label] + [''] * (len(combined_df.columns) - 1)
-                    data_to_upload.append(month_row)
-                    month_separator_rows.append(len(data_to_upload))
-                    current_date = None
-
-                # Add DAILY separator if date changed
-                if current_date != date_key:
-                    current_date = date_key
-                    date_label = f"📅 {collected_date.strftime('%A, %B %d, %Y')}"
-                    date_row = [date_label] + [''] * (len(combined_df.columns) - 1)
-                    data_to_upload.append(date_row)
-                    date_separator_rows.append(len(data_to_upload))
-            except:
-                pass
-
-            data_to_upload.append(row.tolist())
-
-        # Upload to Google Sheets
-        log_status("Uploading to Google Sheets...", "INFO")
-        worksheet.clear()
-        worksheet.update(data_to_upload, value_input_option='RAW')
-
-        # Format separators
-        log_status("Applying formatting to separators...", "INFO")
-
-        # Green background for month separators
-        for row_num in month_separator_rows:
-            worksheet.format(f"A{row_num}:Z{row_num}", {
-                "backgroundColor": {"red": 0.8, "green": 1.0, "blue": 0.8},
-                "textFormat": {"bold": True, "fontSize": 12},
-                "horizontalAlignment": "CENTER"
-            })
-
-        # Blue background for daily separators
-        for row_num in date_separator_rows:
-            worksheet.format(f"A{row_num}:Z{row_num}", {
-                "backgroundColor": {"red": 0.8, "green": 0.9, "blue": 1.0},
-                "textFormat": {"bold": True, "fontSize": 11},
-                "horizontalAlignment": "LEFT"
-            })
-
-        log_status("✅ Sheet updated successfully with daily separators!", "SUCCESS")
+        log_status(f"✅ Appended {new_jobs_count} new LinkedIn jobs to sheet!", "SUCCESS")
 
     else:
         log_status("No new LinkedIn jobs found in last 7 days", "INFO")
 
     run_status["success"] = True
-    run_status["total_jobs_in_sheet"] = len(combined_df) if 'combined_df' in locals() and new_jobs_count > 0 else len(job_rows_df)
+    run_status["total_jobs_in_sheet"] = len(job_rows_df) + new_jobs_count
 
 except Exception as e:
     log_status(f"Google Sheets error: {e}", "ERROR")
