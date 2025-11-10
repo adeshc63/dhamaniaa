@@ -32,17 +32,19 @@ print("="*80)
 SHEET_ID = os.getenv("SHEET_ID", "1ZLniqVQ31t8uahAoIflZm6Jy8wM5gMRYOYG-oIhS6KU")
 CREDS_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "service_account.json")
 
-# Calculate hours since start of current month
+# Search for last 30 days (720 hours) to ensure we get all recent jobs
 from datetime import datetime as dt
 now = dt.now()
-first_day_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-hours_since_month_start = int((now - first_day_of_month).total_seconds() / 3600)
 
-HOURS_IN_CURRENT_MONTH = max(hours_since_month_start, 24)  # At least 24 hours
+HOURS_OLD = 720  # Last 30 days
 ALL_PLATFORMS = ["indeed", "linkedin"]  # Naukri removed - blocked by recaptcha
 
-print(f"Searching for jobs from: {first_day_of_month.strftime('%B %d, %Y')}")
-print(f"Hours to search: {HOURS_IN_CURRENT_MONTH} hours (current month only)")
+# Calculate the start date for display
+from datetime import timedelta
+start_date = now - timedelta(hours=HOURS_OLD)
+
+print(f"Searching for jobs from: {start_date.strftime('%B %d, %Y')} to {now.strftime('%B %d, %Y')}")
+print(f"Hours to search: {HOURS_OLD} hours (last 30 days)")
 print(f"🕐 Agent started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 print("="*80)
 
@@ -798,14 +800,14 @@ all_jobs = []
 total_before_dedup = 0
 
 # Search 1: General nursing jobs in Dubai
-print(f"\n[1/7] Searching for nursing jobs in Dubai (Current month only - {HOURS_IN_CURRENT_MONTH} hours)...")
+print(f"\n[1/7] Searching for nursing jobs in Dubai (Last 30 days - {HOURS_OLD} hours)...")
 log_status("JobSpy Search 1/7: Dubai nursing jobs", "INFO")
 jobs1 = scrape_jobs(
     site_name=ALL_PLATFORMS,
     search_term="nurse nursing registered nurse",
     location="Dubai",
     results_wanted=150,
-    hours_old=HOURS_IN_CURRENT_MONTH,
+    hours_old=HOURS_OLD,
     country_indeed='United Arab Emirates'
 )
 all_jobs.append(jobs1)
@@ -813,26 +815,26 @@ total_before_dedup += len(jobs1)
 print(f"Found {len(jobs1)} jobs")
 
 # Search 2: DHA licensed nursing jobs - WORLDWIDE
-print(f"\n[2/7] Searching for DHA licensed nursing jobs WORLDWIDE (Current month only - {HOURS_IN_CURRENT_MONTH} hours)...")
+print(f"\n[2/7] Searching for DHA licensed nursing jobs WORLDWIDE (Last 30 days - {HOURS_OLD} hours)...")
 jobs2 = scrape_jobs(
     site_name=ALL_PLATFORMS,
     search_term="DHA licensed nurse Dubai Health Authority",
     location="",
     results_wanted=150,
-    hours_old=HOURS_IN_CURRENT_MONTH
+    hours_old=HOURS_OLD
 )
 all_jobs.append(jobs2)
 total_before_dedup += len(jobs2)
 print(f"Found {len(jobs2)} jobs")
 
 # Search 3: Abu Dhabi and Sharjah nursing jobs
-print(f"\n[3/7] Searching for nursing jobs in Abu Dhabi and Sharjah (Current month only - {HOURS_IN_CURRENT_MONTH} hours)...")
+print(f"\n[3/7] Searching for nursing jobs in Abu Dhabi and Sharjah (Last 30 days - {HOURS_OLD} hours)...")
 jobs3 = scrape_jobs(
     site_name=ALL_PLATFORMS,
     search_term="nurse nursing healthcare",
     location="Abu Dhabi",
     results_wanted=150,
-    hours_old=HOURS_IN_CURRENT_MONTH,
+    hours_old=HOURS_OLD,
     country_indeed='United Arab Emirates'
 )
 all_jobs.append(jobs3)
@@ -840,13 +842,13 @@ total_before_dedup += len(jobs3)
 print(f"Found {len(jobs3)} jobs")
 
 # Search 4: Staff and clinical nurse positions
-print(f"\n[4/7] Searching for staff nurse and clinical positions (Current month only - {HOURS_IN_CURRENT_MONTH} hours)...")
+print(f"\n[4/7] Searching for staff nurse and clinical positions (Last 30 days - {HOURS_OLD} hours)...")
 jobs4 = scrape_jobs(
     site_name=ALL_PLATFORMS,
     search_term="staff nurse clinical nurse RN",
     location="Dubai",
     results_wanted=150,
-    hours_old=HOURS_IN_CURRENT_MONTH,
+    hours_old=HOURS_OLD,
     country_indeed='United Arab Emirates'
 )
 all_jobs.append(jobs4)
@@ -854,13 +856,13 @@ total_before_dedup += len(jobs4)
 print(f"Found {len(jobs4)} jobs")
 
 # Search 5: Major hospital groups
-print(f"\n[5/7] Searching major hospitals: NMC, Mediclinic, Fakeeh (Current month only - {HOURS_IN_CURRENT_MONTH} hours)...")
+print(f"\n[5/7] Searching major hospitals: NMC, Mediclinic, Fakeeh (Last 30 days - {HOURS_OLD} hours)...")
 jobs5 = scrape_jobs(
     site_name=ALL_PLATFORMS,
     search_term="nurse NMC Mediclinic Fakeeh hospital",
     location="Dubai",
     results_wanted=150,
-    hours_old=HOURS_IN_CURRENT_MONTH,
+    hours_old=HOURS_OLD,
     country_indeed='United Arab Emirates'
 )
 all_jobs.append(jobs5)
@@ -868,13 +870,13 @@ total_before_dedup += len(jobs5)
 print(f"Found {len(jobs5)} jobs")
 
 # Search 6: Sheikh Shakhbout, Cleveland Clinic, Burjeel hospitals
-print(f"\n[6/7] Searching hospitals: Sheikh Shakhbout, Cleveland Clinic, Burjeel (Current month only - {HOURS_IN_CURRENT_MONTH} hours)...")
+print(f"\n[6/7] Searching hospitals: Sheikh Shakhbout, Cleveland Clinic, Burjeel (Last 30 days - {HOURS_OLD} hours)...")
 jobs6 = scrape_jobs(
     site_name=ALL_PLATFORMS,
     search_term="nurse Sheikh Shakhbout Cleveland Clinic Burjeel",
     location="Abu Dhabi",
     results_wanted=150,
-    hours_old=HOURS_IN_CURRENT_MONTH,
+    hours_old=HOURS_OLD,
     country_indeed='United Arab Emirates'
 )
 all_jobs.append(jobs6)
@@ -882,13 +884,13 @@ total_before_dedup += len(jobs6)
 print(f"Found {len(jobs6)} jobs")
 
 # Search 7: More hospitals
-print(f"\n[7/7] Searching hospitals: Saudi German, Aster, Al Zahra (Current month only - {HOURS_IN_CURRENT_MONTH} hours)...")
+print(f"\n[7/7] Searching hospitals: Saudi German, Aster, Al Zahra (Last 30 days - {HOURS_OLD} hours)...")
 jobs7 = scrape_jobs(
     site_name=ALL_PLATFORMS,
     search_term="nurse Saudi German Aster Al Zahra hospital",
     location="Dubai",
     results_wanted=150,
-    hours_old=HOURS_IN_CURRENT_MONTH,
+    hours_old=HOURS_OLD,
     country_indeed='United Arab Emirates'
 )
 all_jobs.append(jobs7)
