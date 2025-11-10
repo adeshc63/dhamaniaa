@@ -28,16 +28,16 @@ print("="*80)
 SHEET_ID = os.getenv("SHEET_ID", "1ZLniqVQ31t8uahAoIflZm6Jy8wM5gMRYOYG-oIhS6KU")
 CREDS_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "service_account.json")
 
-# For 15-minute runs, search last 1 hour only (to catch very fresh jobs)
-HOURS_OLD = 1  # Last 1 hour
+# For 15-minute runs, search last 24 hours (fresh jobs, not too old)
+HOURS_OLD = 24  # Last 24 hours (1 day)
 LINKEDIN_ONLY = ["linkedin"]
 
 now = datetime.now()
 start_date = now - timedelta(hours=HOURS_OLD)
 
 print(f"⏰ Run time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
-print(f"🔍 Searching LinkedIn for jobs from last {HOURS_OLD} hour")
-print(f"📅 Time range: {start_date.strftime('%H:%M')} to {now.strftime('%H:%M')}")
+print(f"🔍 Searching LinkedIn for jobs from last {HOURS_OLD} hours (24 hours)")
+print(f"📅 Time range: {start_date.strftime('%B %d, %H:%M')} to {now.strftime('%B %d, %H:%M')}")
 print("="*80)
 
 # ============================================================================
