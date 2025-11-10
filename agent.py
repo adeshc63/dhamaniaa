@@ -1140,25 +1140,18 @@ try:
         print(f"Total jobs: {len(combined_df)}")
 
     # ============================================================================
-    # ADD WEEKLY SEPARATORS
+    # ADD DAILY SEPARATORS
     # ============================================================================
-    print("\nAdding weekly separators...")
+    print("\nAdding daily separators...")
 
     # Convert Collected At back to datetime for grouping
     combined_df['Collected At'] = pd.to_datetime(combined_df['Collected At'], errors='coerce')
-
-    # Add week number column
-    combined_df['Week'] = combined_df['Collected At'].dt.isocalendar().week
-    combined_df['Year'] = combined_df['Collected At'].dt.year
 
     # Sort by date (newest first)
     combined_df = combined_df.sort_values(by='Collected At', ascending=False, na_position='last')
 
     # Convert back to string
     combined_df['Collected At'] = combined_df['Collected At'].astype(str)
-
-    # Drop helper columns before upload
-    combined_df = combined_df.drop(['Week', 'Year'], axis=1)
 
     # ============================================================================
     # UPDATE SHEET WITH MERGED DATA
@@ -1216,24 +1209,19 @@ try:
     data_to_upload.append(combined_df.columns.values.tolist())  # Then column headers
 
     current_month = None
-    current_week_in_month = None
-    week_separator_rows = []  # Track rows for yellow highlighting
-    month_separator_rows = []  # Track rows for month headers
+    current_date = None
+    date_separator_rows = []  # Track rows for date separators (blue)
+    month_separator_rows = []  # Track rows for month headers (green)
 
     for idx, row in combined_df.iterrows():
-        # Parse collected_at to get month and week
+        # Parse collected_at to get date
         try:
             collected_date = pd.to_datetime(row['Collected At'])
             year_num = collected_date.year
             month_num = collected_date.month
+            day_num = collected_date.day
             month_key = f"{year_num}-{month_num:02d}"
-
-            # Calculate week number within the month (1-5)
-            first_day_of_month = collected_date.replace(day=1)
-            days_from_start = (collected_date - first_day_of_month).days
-            week_of_month = (days_from_start // 7) + 1
-
-            week_key = f"{month_key}-W{week_of_month}"
+            date_key = f"{year_num}-{month_num:02d}-{day_num:02d}"
 
             # Add month separator if month changed
             if current_month != month_key:
@@ -1241,19 +1229,17 @@ try:
                 month_label = f"═══════════ {collected_date.strftime('%B %Y').upper()} ═══════════"
                 month_row = [month_label] + [''] * (len(combined_df.columns) - 1)
                 data_to_upload.append(month_row)
-                month_separator_rows.append(len(data_to_upload))  # Track for different color
-                current_week_in_month = None  # Reset week tracking for new month
+                month_separator_rows.append(len(data_to_upload))  # Track for green color
+                current_date = None  # Reset date tracking for new month
 
-            # Add week separator if week changed
-            if current_week_in_month != week_key:
-                current_week_in_month = week_key
-                # Calculate week start and end dates
-                week_start = collected_date - timedelta(days=collected_date.weekday())
-                week_end = week_start + timedelta(days=6)
-                week_label = f"─── Week {week_of_month} ({week_start.strftime('%b %d')} - {week_end.strftime('%b %d')}) ───"
-                separator_row = [week_label] + [''] * (len(combined_df.columns) - 1)
-                data_to_upload.append(separator_row)
-                week_separator_rows.append(len(data_to_upload))  # Track row number
+            # Add DAILY separator if date changed
+            if current_date != date_key:
+                current_date = date_key
+                # Show date in readable format with day name
+                date_label = f"📅 {collected_date.strftime('%A, %B %d, %Y')}"
+                date_row = [date_label] + [''] * (len(combined_df.columns) - 1)
+                data_to_upload.append(date_row)
+                date_separator_rows.append(len(data_to_upload))  # Track for blue color
         except:
             pass
 
@@ -1353,18 +1339,18 @@ try:
         pass  # If auto-resize fails, continue anyway
 
     # ========================================================================
-    # FORMATTING FOR MONTH AND WEEK SEPARATORS
+    # FORMATTING FOR MONTH AND DATE SEPARATORS
     # ========================================================================
-    print("Adding highlights for month and week separators...")
+    print("Adding highlights for month and date separators...")
 
     # Green highlight for month headers
     for row_num in month_separator_rows:
         try:
             worksheet.format(f'A{row_num}:O{row_num}', {
-                "backgroundColor": {"red": 0.0, "green": 0.8, "blue": 0.0},  # Green
+                "backgroundColor": {"red": 0.0, "green": 0.7, "blue": 0.0},  # Dark Green
                 "textFormat": {
                     "bold": True,
-                    "fontSize": 12,
+                    "fontSize": 13,
                     "fontFamily": "Arial",
                     "foregroundColor": {"red": 1.0, "green": 1.0, "blue": 1.0}  # White text
                 },
@@ -1373,15 +1359,16 @@ try:
         except:
             pass
 
-    # Yellow highlight for week separators
-    for row_num in week_separator_rows:
+    # Blue highlight for daily separators
+    for row_num in date_separator_rows:
         try:
             worksheet.format(f'A{row_num}:O{row_num}', {
-                "backgroundColor": {"red": 1.0, "green": 1.0, "blue": 0.0},  # Yellow
+                "backgroundColor": {"red": 0.3, "green": 0.6, "blue": 1.0},  # Light Blue
                 "textFormat": {
                     "bold": True,
-                    "fontSize": 10,
-                    "fontFamily": "Arial"
+                    "fontSize": 11,
+                    "fontFamily": "Arial",
+                    "foregroundColor": {"red": 1.0, "green": 1.0, "blue": 1.0}  # White text
                 },
                 "horizontalAlignment": "CENTER"
             })
