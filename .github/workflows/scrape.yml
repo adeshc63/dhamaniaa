@@ -2,7 +2,9 @@ name: UAE Nursing Jobs Scraper
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Run EVERY HOUR (at minute 0)
+    # Run every hour at :00, :15, :30, :45 (more frequent = more reliable)
+    - cron: '0 * * * *'   # Every hour at :00
+    - cron: '30 * * * *'  # Every hour at :30 (backup)
   workflow_dispatch:  # Manual trigger
 
 jobs:
