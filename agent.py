@@ -1093,26 +1093,30 @@ try:
         # ============================================================================
         # DELETE OLD JOBS - Keep only current month (last 30 days)
         # ============================================================================
-        print("Removing old jobs (keeping only current month - last 30 days)...")
+        print("Removing old/expired jobs (keeping only LAST 7 DAYS - fresh jobs only)...")
 
-        # Convert Collected At to datetime (timezone-aware)
-        existing_df['Collected At'] = pd.to_datetime(existing_df['Collected At'], errors='coerce')
+        # Check if "Collected At" column exists
+        if 'Collected At' in existing_df.columns:
+            # Convert Collected At to datetime (timezone-aware)
+            existing_df['Collected At'] = pd.to_datetime(existing_df['Collected At'], errors='coerce')
 
-        # Calculate cutoff date (30 days ago) - make it timezone-aware
-        from datetime import datetime, timedelta, timezone as tz
-        cutoff_date = datetime.now(tz.utc) - timedelta(days=30)
+            # Calculate cutoff date (7 days ago) - make it timezone-aware
+            from datetime import datetime, timedelta, timezone as tz
+            cutoff_date = datetime.now(tz.utc) - timedelta(days=7)
 
-        # Ensure both are timezone-aware for comparison
-        if existing_df['Collected At'].dt.tz is None:
-            existing_df['Collected At'] = existing_df['Collected At'].dt.tz_localize('UTC')
+            # Ensure both are timezone-aware for comparison
+            if existing_df['Collected At'].dt.tz is None:
+                existing_df['Collected At'] = existing_df['Collected At'].dt.tz_localize('UTC')
 
-        # Keep only jobs from last 30 days
-        existing_df = existing_df[existing_df['Collected At'] >= cutoff_date]
+            # Keep only jobs from last 7 days (remove expired jobs)
+            existing_df = existing_df[existing_df['Collected At'] >= cutoff_date]
 
-        # Convert back to string
-        existing_df['Collected At'] = existing_df['Collected At'].astype(str)
+            # Convert back to string
+            existing_df['Collected At'] = existing_df['Collected At'].astype(str)
 
-        print(f"Jobs after cleanup (last 30 days): {len(existing_df)}")
+            print(f"✅ Jobs after cleanup (LAST 7 DAYS ONLY): {len(existing_df)}")
+        else:
+            print("⚠️ 'Collected At' column not found - keeping all existing jobs")
 
         # ============================================================================
         # MERGE: Keep old + Add only NEW jobs
