@@ -32,19 +32,19 @@ print("="*80)
 SHEET_ID = os.getenv("SHEET_ID", "1ZLniqVQ31t8uahAoIflZm6Jy8wM5gMRYOYG-oIhS6KU")
 CREDS_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "service_account.json")
 
-# Search for last 30 days (720 hours) to ensure we get all recent jobs
+# Search for LAST 24 HOURS ONLY - Today's fresh jobs
 from datetime import datetime as dt
 now = dt.now()
 
-HOURS_OLD = 720  # Last 30 days
+HOURS_OLD = 24  # Last 24 hours (TODAY'S JOBS ONLY)
 ALL_PLATFORMS = ["indeed", "linkedin"]  # Naukri removed - blocked by recaptcha
 
 # Calculate the start date for display
 from datetime import timedelta
 start_date = now - timedelta(hours=HOURS_OLD)
 
-print(f"Searching for jobs from: {start_date.strftime('%B %d, %Y')} to {now.strftime('%B %d, %Y')}")
-print(f"Hours to search: {HOURS_OLD} hours (last 30 days)")
+print(f"🔥 Searching for TODAY'S FRESH JOBS ONLY (Last 24 hours)")
+print(f"📅 Time range: {start_date.strftime('%B %d, %Y %H:%M')} to {now.strftime('%B %d, %Y %H:%M')}")
 print(f"🕐 Agent started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 print("="*80)
 
