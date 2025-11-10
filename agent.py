@@ -1086,6 +1086,7 @@ try:
 
         # Make sure _uid column exists in existing data
         if '_uid' not in existing_df.columns:
+            existing_df = existing_df.reset_index(drop=True)
             existing_df['_uid'] = existing_df.apply(uid_for, axis=1)
 
         print(f"Existing jobs in sheet: {len(existing_df)}")
@@ -1108,8 +1109,8 @@ try:
             if existing_df['Collected At'].dt.tz is None:
                 existing_df['Collected At'] = existing_df['Collected At'].dt.tz_localize('UTC')
 
-            # Keep only jobs from last 7 days (remove expired jobs)
-            existing_df = existing_df[existing_df['Collected At'] >= cutoff_date]
+            # Keep only jobs from last 7 days (remove expired jobs) and RESET INDEX
+            existing_df = existing_df[existing_df['Collected At'] >= cutoff_date].reset_index(drop=True)
 
             # Convert back to string
             existing_df['Collected At'] = existing_df['Collected At'].astype(str)
@@ -1128,18 +1129,21 @@ try:
         new_jobs_df['is_new'] = ~new_jobs_df['_uid'].isin(existing_uids)
         new_jobs_count = new_jobs_df['is_new'].sum()
 
-        # Add 🔥 emoji to NEW job titles
-        new_jobs_df.loc[new_jobs_df['is_new'], 'Job Title'] = '🔥 ' + new_jobs_df.loc[new_jobs_df['is_new'], 'Job Title'].astype(str)
+        # Add 🔥 emoji to NEW job titles - using copy to avoid SettingWithCopyWarning
+        new_jobs_df = new_jobs_df.reset_index(drop=True).copy()
+        new_mask = new_jobs_df['is_new'].values
+        new_jobs_df.loc[new_mask, 'Job Title'] = '🔥 ' + new_jobs_df.loc[new_mask, 'Job Title'].astype(str)
 
-        # Combine old and new
+        # Combine old and new - reset indices before concat
+        existing_df = existing_df.reset_index(drop=True)
         combined_df = pd.concat([existing_df, new_jobs_df], ignore_index=True)
 
         # Remove duplicates (keep first occurrence = old jobs stay)
-        combined_df = combined_df.drop_duplicates(subset=['_uid'], keep='first')
+        combined_df = combined_df.drop_duplicates(subset=['_uid'], keep='first').reset_index(drop=True)
 
         # Sort by Collected At (newest first)
         combined_df['Collected At'] = pd.to_datetime(combined_df['Collected At'], errors='coerce')
-        combined_df = combined_df.sort_values(by='Collected At', ascending=False, na_position='last')
+        combined_df = combined_df.sort_values(by='Collected At', ascending=False, na_position='last').reset_index(drop=True)
         # Convert back to string for Google Sheets
         combined_df['Collected At'] = combined_df['Collected At'].astype(str)
 
@@ -1154,8 +1158,9 @@ try:
         new_jobs_df['Job Title'] = '🔥 ' + new_jobs_df['Job Title'].astype(str)
 
         combined_df = new_jobs_df
-        combined_df = combined_df.sort_values(by='Collected At', ascending=False)
-        print(f"🔥 NEW jobs added: {len(combined_df)}")
+        combined_df = combined_df.sort_values(by='Collected At', ascending=False).reset_index(drop=True)
+        new_jobs_count = len(combined_df)  # Set new_jobs_count for first run
+        print(f"🔥 NEW jobs added: {new_jobs_count}")
         print(f"Total jobs: {len(combined_df)}")
 
     # ============================================================================
@@ -1166,8 +1171,8 @@ try:
     # Convert Collected At back to datetime for grouping
     combined_df['Collected At'] = pd.to_datetime(combined_df['Collected At'], errors='coerce')
 
-    # Sort by date (newest first)
-    combined_df = combined_df.sort_values(by='Collected At', ascending=False, na_position='last')
+    # Sort by date (newest first) and RESET INDEX to avoid reindexing error
+    combined_df = combined_df.sort_values(by='Collected At', ascending=False, na_position='last').reset_index(drop=True)
 
     # Convert back to string
     combined_df['Collected At'] = combined_df['Collected At'].astype(str)
@@ -1252,6 +1257,9 @@ try:
     current_date = None
     date_separator_rows = []  # Track rows for date separators (blue)
     month_separator_rows = []  # Track rows for month headers (green)
+
+    # Reset index again before iteration to avoid duplicate index errors
+    combined_df = combined_df.reset_index(drop=True)
 
     for idx, row in combined_df.iterrows():
         # Parse collected_at to get date
