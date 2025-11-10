@@ -1196,32 +1196,53 @@ try:
     # Count jobs by Platform
     platform_counts = combined_df['Platform'].value_counts().to_dict()
 
-    # Build summary table
+    # Build summary table with STATUS DASHBOARD
     summary_rows = []
-    summary_rows.append(['📊 JOB SOURCES SUMMARY', ''])
-    summary_rows.append(['Platform', 'Total Jobs'])
+    summary_rows.append(['📊 JOB SOURCES SUMMARY', '', '🤖 BOT STATUS', ''])
+    summary_rows.append(['Platform', 'Total Jobs', 'Metric', 'Value'])
 
-    # Add Indeed count
+    # Add status info
+    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    status_info = [
+        ['Status', '✅ RUNNING'],
+        ['Last Update', current_time],
+        ['This Run Found', f'{len(new_jobs_df)} jobs'],
+        ['NEW Added', f'🔥 {new_jobs_count} new'],
+        ['Sheet Total', f'{len(combined_df)} jobs'],
+        ['Search Range', '24 hours'],
+        ['Next Run', 'In 1 hour']
+    ]
+
+    # Add Indeed count + status row
     indeed_count = platform_counts.get('Indeed', 0)
-    summary_rows.append(['Indeed', str(indeed_count)])
+    summary_rows.append(['Indeed', str(indeed_count), status_info[0][0], status_info[0][1]])
 
-    # Add LinkedIn count
+    # Add LinkedIn count + status row
     linkedin_count = platform_counts.get('Linkedin', 0)
-    summary_rows.append(['LinkedIn', str(linkedin_count)])
+    summary_rows.append(['LinkedIn', str(linkedin_count), status_info[1][0], status_info[1][1]])
 
-    # Add hospital counts
+    # Add hospital counts + remaining status rows
     hospital_total = 0
+    status_idx = 2
     for platform, count in sorted(platform_counts.items()):
         if platform not in ['Indeed', 'Linkedin']:
-            summary_rows.append([platform, str(count)])
+            status_metric = status_info[status_idx][0] if status_idx < len(status_info) else ''
+            status_value = status_info[status_idx][1] if status_idx < len(status_info) else ''
+            summary_rows.append([platform, str(count), status_metric, status_value])
             hospital_total += count
+            status_idx += 1
+
+    # Add remaining status rows if any
+    while status_idx < len(status_info):
+        summary_rows.append(['', '', status_info[status_idx][0], status_info[status_idx][1]])
+        status_idx += 1
 
     # Add totals
-    summary_rows.append(['', ''])
-    summary_rows.append(['TOTAL JobSpy', str(indeed_count + linkedin_count)])
-    summary_rows.append(['TOTAL Hospitals', str(hospital_total)])
-    summary_rows.append(['GRAND TOTAL', str(len(combined_df))])
-    summary_rows.append(['', ''])
+    summary_rows.append(['', '', '', ''])
+    summary_rows.append(['TOTAL JobSpy', str(indeed_count + linkedin_count), '', ''])
+    summary_rows.append(['TOTAL Hospitals', str(hospital_total), '', ''])
+    summary_rows.append(['GRAND TOTAL', str(len(combined_df)), '', ''])
+    summary_rows.append(['', '', '', ''])
 
     # Prepare data with summary table at top
     data_to_upload = summary_rows + [[''], ['']]  # Add 2 blank rows after summary
@@ -1276,7 +1297,7 @@ try:
     # ========================================================================
     print("Formatting summary table...")
 
-    # Format summary title row (row 1) - Blue background
+    # Format summary title row (row 1) - Blue background for sources, Green for status
     worksheet.format('A1:B1', {
         "backgroundColor": {"red": 0.2, "green": 0.4, "blue": 0.8},
         "textFormat": {
@@ -1288,9 +1309,30 @@ try:
         "horizontalAlignment": "CENTER"
     })
 
-    # Format summary header row (row 2) - Light blue
+    worksheet.format('C1:D1', {
+        "backgroundColor": {"red": 0.2, "green": 0.7, "blue": 0.3},
+        "textFormat": {
+            "bold": True,
+            "fontSize": 13,
+            "fontFamily": "Arial",
+            "foregroundColor": {"red": 1.0, "green": 1.0, "blue": 1.0}
+        },
+        "horizontalAlignment": "CENTER"
+    })
+
+    # Format summary header row (row 2) - Light blue for sources, light green for status
     worksheet.format('A2:B2', {
         "backgroundColor": {"red": 0.7, "green": 0.8, "blue": 1.0},
+        "textFormat": {
+            "bold": True,
+            "fontSize": 11,
+            "fontFamily": "Arial"
+        },
+        "horizontalAlignment": "CENTER"
+    })
+
+    worksheet.format('C2:D2', {
+        "backgroundColor": {"red": 0.7, "green": 0.9, "blue": 0.7},
         "textFormat": {
             "bold": True,
             "fontSize": 11,
