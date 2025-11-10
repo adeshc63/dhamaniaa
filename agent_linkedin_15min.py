@@ -238,6 +238,9 @@ try:
         combined_df["Collected At"] = pd.to_datetime(combined_df["Collected At"], errors='coerce')
         combined_df = combined_df.sort_values(by="Collected At", ascending=False, na_position='last')
 
+        # Convert Timestamp to string for JSON serialization
+        combined_df["Collected At"] = combined_df["Collected At"].astype(str)
+
         log_status(f"Total jobs after adding new: {len(combined_df)}", "INFO")
 
         # Prepare data with DAILY separators
@@ -310,11 +313,12 @@ try:
         log_status("No new LinkedIn jobs found in last hour", "INFO")
 
     run_status["success"] = True
-    run_status["total_jobs_in_sheet"] = len(combined_df) if new_jobs_count > 0 else len(job_rows_df)
+    run_status["total_jobs_in_sheet"] = len(combined_df) if 'combined_df' in locals() and new_jobs_count > 0 else len(job_rows_df)
 
 except Exception as e:
     log_status(f"Google Sheets error: {e}", "ERROR")
     run_status["errors"].append(str(e))
+    run_status["total_jobs_in_sheet"] = len(job_rows_df) if 'job_rows_df' in locals() else 0
     import traceback
     traceback.print_exc()
 
