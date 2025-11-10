@@ -795,7 +795,7 @@ def scrape_healthpoint():
 # JOBSPY SCRAPING
 # ============================================================================
 
-log_status("Starting JobSpy scraping (7 searches)", "INFO")
+log_status("Starting JobSpy scraping (8 searches)", "INFO")
 all_jobs = []
 total_before_dedup = 0
 
@@ -896,6 +896,21 @@ jobs7 = scrape_jobs(
 all_jobs.append(jobs7)
 total_before_dedup += len(jobs7)
 print(f"Found {len(jobs7)} jobs")
+
+# Search 8: Oracle + Tech companies nursing/health roles
+print(f"\n[8/8] Searching Oracle, tech companies health roles (Last 30 days - {HOURS_OLD} hours)...")
+log_status("JobSpy Search 8/8: Oracle + tech health jobs", "INFO")
+jobs8 = scrape_jobs(
+    site_name=ALL_PLATFORMS,
+    search_term="Oracle nurse occupational health wellness",
+    location="Dubai",
+    results_wanted=100,
+    hours_old=HOURS_OLD,
+    country_indeed='United Arab Emirates'
+)
+all_jobs.append(jobs8)
+total_before_dedup += len(jobs8)
+print(f"Found {len(jobs8)} jobs")
 
 # ============================================================================
 # HOSPITAL DIRECT SCRAPING
@@ -1397,7 +1412,7 @@ try:
     print("📊 AGENT RUN SUMMARY")
     print("="*80)
     log_status(f"Total runtime: {int(duration)} seconds ({duration/60:.1f} minutes)", "INFO")
-    log_status(f"JobSpy searches: 7/7 completed", "SUCCESS")
+    log_status(f"JobSpy searches: 8/8 completed", "SUCCESS")
     log_status(f"Hospital scrapers: 15 attempted", "INFO")
     log_status(f"Jobs scraped this run: {len(new_jobs_df)}", "SUCCESS")
     log_status(f"🔥 NEW jobs added to sheet: {run_status['new_jobs_added']}", "SUCCESS")

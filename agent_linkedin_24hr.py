@@ -94,7 +94,7 @@ all_jobs = []
 
 try:
     # Search 1: Dubai nursing
-    log_status("[1/5] Dubai nursing jobs (LinkedIn)...", "INFO")
+    log_status("[1/6] Dubai nursing jobs (LinkedIn)...", "INFO")
     jobs1 = scrape_jobs(
         site_name=LINKEDIN_ONLY,
         search_term="nurse nursing registered nurse",
@@ -107,7 +107,7 @@ try:
     run_status["searches_completed"] += 1
 
     # Search 2: DHA licensed
-    log_status("[2/5] DHA licensed nursing jobs (LinkedIn)...", "INFO")
+    log_status("[2/6] DHA licensed nursing jobs (LinkedIn)...", "INFO")
     jobs2 = scrape_jobs(
         site_name=LINKEDIN_ONLY,
         search_term="DHA licensed nurse Dubai Health Authority",
@@ -119,7 +119,7 @@ try:
     run_status["searches_completed"] += 1
 
     # Search 3: Abu Dhabi
-    log_status("[3/5] Abu Dhabi nursing jobs (LinkedIn)...", "INFO")
+    log_status("[3/6] Abu Dhabi nursing jobs (LinkedIn)...", "INFO")
     jobs3 = scrape_jobs(
         site_name=LINKEDIN_ONLY,
         search_term="nurse nursing healthcare",
@@ -132,7 +132,7 @@ try:
     run_status["searches_completed"] += 1
 
     # Search 4: Sharjah
-    log_status("[4/5] Sharjah nursing jobs (LinkedIn)...", "INFO")
+    log_status("[4/6] Sharjah nursing jobs (LinkedIn)...", "INFO")
     jobs4 = scrape_jobs(
         site_name=LINKEDIN_ONLY,
         search_term="nurse nursing RN staff nurse",
@@ -145,7 +145,7 @@ try:
     run_status["searches_completed"] += 1
 
     # Search 5: UAE-wide clinical positions
-    log_status("[5/5] UAE clinical nursing positions (LinkedIn)...", "INFO")
+    log_status("[5/6] UAE clinical nursing positions (LinkedIn)...", "INFO")
     jobs5 = scrape_jobs(
         site_name=LINKEDIN_ONLY,
         search_term="clinical nurse practitioner healthcare UAE",
@@ -156,7 +156,19 @@ try:
     all_jobs.append(jobs5)
     run_status["searches_completed"] += 1
 
-    log_status(f"LinkedIn searches completed: {run_status['searches_completed']}/5", "SUCCESS")
+    # Search 6: Oracle + tech company health jobs
+    log_status("[6/6] Oracle health jobs (LinkedIn)...", "INFO")
+    jobs6 = scrape_jobs(
+        site_name=LINKEDIN_ONLY,
+        search_term="Oracle occupational health nurse wellness corporate",
+        location="Dubai",
+        results_wanted=100,
+        hours_old=HOURS_OLD
+    )
+    all_jobs.append(jobs6)
+    run_status["searches_completed"] += 1
+
+    log_status(f"LinkedIn searches completed: {run_status['searches_completed']}/6", "SUCCESS")
 
 except Exception as e:
     log_status(f"LinkedIn scraping error: {e}", "ERROR")
