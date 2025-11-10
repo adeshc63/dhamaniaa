@@ -897,14 +897,14 @@ all_jobs.append(jobs7)
 total_before_dedup += len(jobs7)
 print(f"Found {len(jobs7)} jobs")
 
-# Search 8: Oracle + Tech companies nursing/health roles
-print(f"\n[8/8] Searching Oracle, tech companies health roles (Last 30 days - {HOURS_OLD} hours)...")
-log_status("JobSpy Search 8/8: Oracle + tech health jobs", "INFO")
+# Search 8: Bayt, GulfTalent, Naukrigulf, Monster Gulf
+print(f"\n[8/8] Searching UAE job portals (Bayt/GulfTalent) (Last 30 days - {HOURS_OLD} hours)...")
+log_status("JobSpy Search 8/8: UAE job portals", "INFO")
 jobs8 = scrape_jobs(
     site_name=ALL_PLATFORMS,
-    search_term="Oracle nurse occupational health wellness",
-    location="Dubai",
-    results_wanted=100,
+    search_term="nurse registered nurse DHA MOH",
+    location="United Arab Emirates",
+    results_wanted=200,
     hours_old=HOURS_OLD,
     country_indeed='United Arab Emirates'
 )

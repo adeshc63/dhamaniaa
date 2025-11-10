@@ -156,13 +156,13 @@ try:
     all_jobs.append(jobs5)
     run_status["searches_completed"] += 1
 
-    # Search 6: Oracle + tech company health jobs
-    log_status("[6/6] Oracle health jobs (LinkedIn)...", "INFO")
+    # Search 6: MOH/HAAD/DOH licensed nurses
+    log_status("[6/6] MOH/HAAD/DOH licensed nurses (LinkedIn)...", "INFO")
     jobs6 = scrape_jobs(
         site_name=LINKEDIN_ONLY,
-        search_term="Oracle occupational health nurse wellness corporate",
-        location="Dubai",
-        results_wanted=100,
+        search_term="MOH HAAD DOH licensed nurse healthcare",
+        location="United Arab Emirates",
+        results_wanted=150,
         hours_old=HOURS_OLD
     )
     all_jobs.append(jobs6)
